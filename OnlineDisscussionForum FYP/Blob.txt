@@ -1,0 +1,9 @@
+28. full
+29. 00:00....02:08....08:50
+
+
+Program.cs Lines(22-26) Commented
+storageSettings.json All lines Commented
+
+
+35. 09:31

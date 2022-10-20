@@ -1,0 +1,9 @@
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum.Data\bin\Debug\netcoreapp2.1\OnlineDisscussionForum.Data.deps.json
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum.Data\bin\Debug\netcoreapp2.1\OnlineDisscussionForum.Data.dll
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum.Data\obj\Debug\netcoreapp2.1\OnlineDisscussionForum.Data.csprojAssemblyReference.cache
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum.Data\obj\Debug\netcoreapp2.1\OnlineDisscussionForum.Data.csproj.CoreCompileInputs.cache
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum.Data\obj\Debug\netcoreapp2.1\OnlineDisscussionForum.Data.AssemblyInfoInputs.cache
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum.Data\obj\Debug\netcoreapp2.1\OnlineDisscussionForum.Data.AssemblyInfo.cs
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum.Data\bin\Debug\netcoreapp2.1\OnlineDisscussionForum.Data.pdb
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum.Data\obj\Debug\netcoreapp2.1\OnlineDisscussionForum.Data.dll
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum.Data\obj\Debug\netcoreapp2.1\OnlineDisscussionForum.Data.pdb

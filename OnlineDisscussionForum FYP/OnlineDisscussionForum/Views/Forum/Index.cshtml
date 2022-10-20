@@ -1,0 +1,79 @@
+﻿@model OnlineDisscussionForum.Models.Forum.ForumIndexModel
+
+<div class="container body-content">
+        <div class="row sectionHeader">
+        <div class="sectionHeading">Browse Forums</div>
+        <div class="sectionDescription">
+            <p>Welcome to <strong>Military Discussion Forum</strong>.Posts are divided into categories.</p>
+            <p>
+                Please read Forum Guidlines before creating a new post.
+                @if(!User.Identity.IsAuthenticated)
+                {
+                    <span>You must be a <a asp-controller="Account" asp-action="Register">registerd member</a>to create new post.
+</span>
+                }
+            </p>
+        </div>
+    </div>
+
+    <div class="row" id="forumIndexContent">
+        <table class="table table-hover" id="forumIndexTable">
+            <tbody>
+                @foreach(var forum in Model.ForumList)
+                {
+                    <tr>
+                        <td>
+                            <div class="forumLogo" style="background-image:url(@forum.ImageUrl)"></div>
+                            <div class="forumData">
+                                <div class="forumTitle">
+                                    <a asp-controller="Forum" asp-action="Topic" asp-route-id="@forum.Id">@forum.Name</a>
+                                </div>
+                                <div class="forumSubTitle">
+                                    @if(forum.HasRecentPost)
+                                    { 
+                                        <div class="hasRecentPosts">Hot</div>
+                                        //video38
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                        <td >
+                            <div class="forumPostCount">
+                                @forum.NumberOfPosts Posts
+                            </div>
+                            <div class="forumMemberCount">
+                                @forum.NumberOfUsers Users
+                            </div>
+                        </td>
+                        <td  class="forumDescription" >
+                            @forum.Description
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+
+@*<h1>Forums</h1>
+<table class="table table-hover" id="forumIndexTable">
+    <tbody>
+        @foreach (var forum in Model.ForumList)
+        {
+            <tr>
+                <td>
+                    <a asp-controller="Forum" asp-action="Topic" asp-route-id="@forum.Id">
+                        @forum.Name
+                    </a>
+                </td>
+                <td>
+                    @forum.Description
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>*@

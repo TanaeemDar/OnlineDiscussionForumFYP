@@ -1,0 +1,34 @@
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\OnlineDisscussionForum.csprojAssemblyReference.cache
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\OnlineDisscussionForum.csproj.CoreCompileInputs.cache
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\OnlineDisscussionForum.AssemblyInfoInputs.cache
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\OnlineDisscussionForum.AssemblyInfo.cs
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.deps.json
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.runtimeconfig.json
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.runtimeconfig.dev.json
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.dll
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.pdb
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\OnlineDisscussionForum.dll
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\OnlineDisscussionForum.pdb
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.Data.dll
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.Data.pdb
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\OnlineDisscussionForum.csproj.CopyComplete
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.Service.dll
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.Service.pdb
+C:\Users\TANAEEM DAR\Desktop\OnlineDisscussionForum\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\UserSecretsAssemblyInfo.cs
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.deps.json
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.runtimeconfig.json
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.runtimeconfig.dev.json
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.dll
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.pdb
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.Data.dll
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.Service.dll
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.Data.pdb
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\bin\Debug\netcoreapp2.0\OnlineDisscussionForum.Service.pdb
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\OnlineDisscussionForum.csprojAssemblyReference.cache
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\OnlineDisscussionForum.csproj.CoreCompileInputs.cache
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\UserSecretsAssemblyInfo.cs
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\OnlineDisscussionForum.AssemblyInfoInputs.cache
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\OnlineDisscussionForum.AssemblyInfo.cs
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\OnlineDisscussionForum.csproj.CopyComplete
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\OnlineDisscussionForum.dll
+C:\Users\TANAEEM DAR\Desktop\Web Projects\OnlineDisscussionForum FYP\OnlineDisscussionForum\obj\Debug\netcoreapp2.0\OnlineDisscussionForum.pdb
