@@ -268,13 +268,19 @@ body {
 
 #forumIndexTable td {
     background-color: rgba(255,255,255,0.9);
+    vertical-align: middle;
+    position:relative;
 }
 #forumIndexTable tr:hover {
     background-color: rgba(0,116,238,1);
 
 }
 .forumData{
-    display:inline-block;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    min-height:48px;
+    margin-left:68px;
 }
 .forumTitle{
     font-family:'Roboto';
@@ -296,11 +302,23 @@ body {
     border-radius:3px;
     float:left;
     margin-right:20px;
-    height:40px;
-    width:40px;
-    background-color:#ddd;
+    height:48px;
+    width:48px;
+    padding:4px;
+    box-sizing:border-box;
+    background-color:#fff;
     border:1px solid #555;
-    background-size:100%;
+    background-size:contain;
+    background-position:center;
+    background-repeat:no-repeat;
+    background-origin:content-box;
+}
+#forumIndexTable .forumLogo:has(+ .forumData) {
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    float:none;
+    margin-right:0;
 }
 .forumPostCount{
     color:#888;
