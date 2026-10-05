@@ -38,9 +38,9 @@ namespace OnlineDisscussionForum.Controllers
                 AuthorRating = post.User.Rating,
                 DatePosted = post.Created.ToString(),
                 RepliesCount = post.Replies.Count(),
-                Forum = GetForumListingForPost(post)
+                Forum = new ForumListingModel { Id = post.ForumId, Name = post.Forum.Title, ImageUrl = post.Forum.ImageUrl }
 
-            });
+            }).ToList();
 
             return new HomeIndexModel
             {

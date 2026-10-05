@@ -5,6 +5,8 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
+using OnlineDisscussionForum.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +28,8 @@ namespace OnlineDisscussionForum.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
         private readonly UrlEncoder _urlEncoder;
+        private readonly ApplicationDbContext _db;
+        private readonly IUpload _uploads;
 
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
         private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
@@ -35,13 +39,15 @@ namespace OnlineDisscussionForum.Controllers
           SignInManager<ApplicationUser> signInManager,
           IEmailSender emailSender,
           ILogger<ManageController> logger,
-          UrlEncoder urlEncoder)
+          UrlEncoder urlEncoder, ApplicationDbContext db, IUpload uploads)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
             _urlEncoder = urlEncoder;
+            _db = db;
+            _uploads = uploads;
         }
 
         [TempData]
@@ -83,13 +89,20 @@ namespace OnlineDisscussionForum.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
+            await using var settingsTransaction = await _db.Database.BeginTransactionAsync();
+            if (model.Username != user.UserName)
+            {
+                var changed = await _userManager.SetUserNameAsync(user, model.Username);
+                if (!changed.Succeeded) { AddErrors(changed); return View(model); }
+            }
             var email = user.Email;
             if (model.Email != email)
             {
                 var setEmailResult = await _userManager.SetEmailAsync(user, model.Email);
                 if (!setEmailResult.Succeeded)
                 {
-                    throw new ApplicationException($"Unexpected error occurred setting email for user with ID '{user.Id}'.");
+                    AddErrors(setEmailResult);
+                    return View(model);
                 }
             }
 
@@ -99,10 +112,13 @@ namespace OnlineDisscussionForum.Controllers
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, model.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
-                    throw new ApplicationException($"Unexpected error occurred setting phone number for user with ID '{user.Id}'.");
+                    AddErrors(setPhoneResult);
+                    return View(model);
                 }
             }
 
+            await settingsTransaction.CommitAsync();
+            await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
             return RedirectToAction(nameof(Index));
         }
@@ -111,6 +127,7 @@ namespace OnlineDisscussionForum.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SendVerificationEmail(IndexViewModel model)
         {
+            if (!_emailSender.IsEnabled) return BadRequest("Email confirmation is disabled.");
             if (!ModelState.IsValid)
             {
                 return View(model);
@@ -490,6 +507,41 @@ namespace OnlineDisscussionForum.Controllers
             var model = new ShowRecoveryCodesViewModel { RecoveryCodes = recoveryCodes.ToArray() };
 
             return View(nameof(ShowRecoveryCodes), model);
+        }
+
+        [HttpGet]
+        public IActionResult DeleteAccount() => View(new DeleteAccountViewModel());
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteAccount(DeleteAccountViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+            if (!model.Confirm) ModelState.AddModelError("Confirm", "Confirm account deletion.");
+            if (!ModelState.IsValid) return View(model);
+            if (!await _userManager.CheckPasswordAsync(user, model.Password))
+            { ModelState.AddModelError("Password", "Incorrect password."); return View(model); }
+            await using var transaction = await _db.Database.BeginTransactionAsync();
+            if (await _userManager.IsInRoleAsync(user, "Admin") &&
+                (await _userManager.GetUsersInRoleAsync("Admin")).Count(u => u.IsActive) <= 1)
+            { ModelState.AddModelError("", "The last active administrator cannot delete their account."); return View(model); }
+            var image = user.ProfileImageUrl;
+            _db.UserClaims.RemoveRange(_db.UserClaims.Where(c => c.UserId == user.Id));
+            _db.UserLogins.RemoveRange(_db.UserLogins.Where(c => c.UserId == user.Id));
+            _db.UserTokens.RemoveRange(_db.UserTokens.Where(c => c.UserId == user.Id));
+            _db.UserRoles.RemoveRange(_db.UserRoles.Where(c => c.UserId == user.Id));
+            var name = "Deleted_" + Guid.NewGuid().ToString("N");
+            user.UserName = name; user.NormalizedUserName = _userManager.NormalizeName(name);
+            user.Email = null; user.NormalizedEmail = null; user.PhoneNumber = null;
+            user.PasswordHash = null; user.ProfileImageUrl = "/images/forum/default.png";
+            user.EmailConfirmed = false; user.PhoneNumberConfirmed = false; user.TwoFactorEnabled = false;
+            user.IsActive = false; user.SecurityStamp = Guid.NewGuid().ToString();
+            user.ConcurrencyStamp = Guid.NewGuid().ToString(); user.Rating = 0;
+            user.MemberSince = DateTime.UnixEpoch; user.AccessFailedCount = 0;
+            await _db.SaveChangesAsync(); await transaction.CommitAsync();
+            await _uploads.DeleteImageAsync(image);
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
         }
 
         #region Helpers

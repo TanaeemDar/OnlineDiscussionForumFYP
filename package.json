@@ -1,0 +1,6 @@
+{
+  "name": "online-discussion-forum-checks",
+  "private": true,
+  "scripts": { "test:browser": "node scripts/browser-check.mjs" },
+  "devDependencies": { "playwright": "1.63.0" }
+}

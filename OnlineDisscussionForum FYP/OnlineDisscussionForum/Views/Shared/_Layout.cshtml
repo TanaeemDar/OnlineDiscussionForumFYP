@@ -1,11 +1,12 @@
-﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
 @inject UserManager<OnlineDisscussionForum.Data.Models.ApplicationUser> UserManager
 @inject SignInManager<OnlineDisscussionForum.Data.Models.ApplicationUser> SignInManager
 
 
 
 
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -19,22 +20,25 @@
         <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/css/bootstrap.min.css"
               asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
-        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     </environment>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <!DOCTYPE html>
 </head>
 <body>
     <nav class="navbar navbar-default navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#forum-navigation" aria-expanded="false" aria-controls="forum-navigation">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
+            </button>
             <a class="navbar-brand navLogo" asp-controller="Home" asp-action="Index"></a>
                
             </div>
-        <div class="navbar-collapse collapse">
+        <div class="navbar-collapse collapse" id="forum-navigation">
             <ul class="nav navbar-nav">
                 <li><a asp-controller="Forum" asp-action="Index">Forums</a></li>
                 @if (SignInManager.IsSignedIn(User))
@@ -44,7 +48,7 @@
                         <ul class="dropdown-menu">
                             <li role="separator" class="divider"></li>
                             <li class="dropdown-header">Profile</li>
-                            <li><a asp-controller="Profile" asp-action="Detail" asp-route-id="@UserManager.GetUserId(User)">My Profile</a></li>
+                            <li><a asp-controller="Manage" asp-action="Index">My Profile</a></li>
                             @if (User.IsInRole("Admin"))
                             {
                                 <li role="separator" class="divider"></li>

@@ -1,12 +1,6 @@
-﻿using Microsoft.WindowsAzure.Storage.Blob;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace OnlineDisscussionForum.Data
+namespace OnlineDisscussionForum.Data;
+public interface IUpload
 {
-   public interface IUpload
-    {
-        CloudBlobContainer GetBlobContainer(string connectionString, string containerName);
-    }
+    Task<string> SaveImageAsync(Stream stream, string owner, CancellationToken cancellationToken = default);
+    Task DeleteImageAsync(string url);
 }

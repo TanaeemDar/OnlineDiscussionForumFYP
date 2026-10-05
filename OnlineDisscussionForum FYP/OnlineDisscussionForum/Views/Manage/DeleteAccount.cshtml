@@ -1,0 +1,9 @@
+@model DeleteAccountViewModel
+<h2>Delete my account</h2>
+<p>Your account details will be removed. Your posts and replies will remain with an anonymous author. This action cannot be undone.</p>
+<form method="post" asp-action="DeleteAccount">
+<div asp-validation-summary="All" class="text-danger"></div>
+<label asp-for="Password">Confirm your password</label><input asp-for="Password" class="form-control" />
+<p><label><input asp-for="Confirm" /> I understand and want to delete my account.</label></p>
+<button type="submit" class="btn btn-danger">Delete my account</button>
+</form>

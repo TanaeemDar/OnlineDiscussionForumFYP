@@ -1,0 +1,8 @@
+@model DeleteContentModel
+<div class="container body-content"><h2>Delete @Model.Title?</h2>
+<p>Only empty forums can be deleted.</p>
+<form method="post" asp-action="Delete" asp-route-id="@Model.Id">
+<div asp-validation-summary="All" class="text-danger"></div>
+<input asp-for="Id" type="hidden" /><input asp-for="Version" type="hidden" />
+<button type="submit" class="btn btn-danger">Confirm deletion</button>
+</form></div>

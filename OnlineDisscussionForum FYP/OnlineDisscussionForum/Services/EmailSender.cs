@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text.Json;
+namespace OnlineDisscussionForum.Services;
 
-namespace OnlineDisscussionForum.Services
+// Production email is intentionally disabled. Development pickup files are never publicly served.
+public class EmailSender(IConfiguration configuration, LocalDataPaths paths, IWebHostEnvironment environment) : IEmailSender
 {
-    // This class is used by the application to send email for account confirmation and password reset.
-    // For more details see https://go.microsoft.com/fwlink/?LinkID=532713
-    public class EmailSender : IEmailSender
+    public bool IsEnabled => environment.IsDevelopment() && configuration["Email:Mode"] == "Pickup";
+    public async Task SendEmailAsync(string email, string subject, string message)
     {
-        public Task SendEmailAsync(string email, string subject, string message)
-        {
-            return Task.CompletedTask;
-        }
+        if (!IsEnabled) throw new InvalidOperationException("Email delivery is disabled.");
+        var directory = Path.Combine(paths.Root, "mail"); Directory.CreateDirectory(directory);
+        var file = Path.Combine(directory, Guid.NewGuid().ToString("N") + ".json");
+        await File.WriteAllTextAsync(file, JsonSerializer.Serialize(new { To = email, Subject = subject, HtmlBody = message }));
     }
 }

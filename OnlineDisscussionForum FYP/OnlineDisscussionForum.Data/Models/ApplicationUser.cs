@@ -1,4 +1,4 @@
-﻿
+
 using Microsoft.AspNetCore.Identity;
 using System;
 
@@ -10,7 +10,7 @@ namespace OnlineDisscussionForum.Data.Models
         public int Rating { get; set; }
         public string ProfileImageUrl { get; set; }
         public DateTime  MemberSince { get; set; }
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
 
     }
 }

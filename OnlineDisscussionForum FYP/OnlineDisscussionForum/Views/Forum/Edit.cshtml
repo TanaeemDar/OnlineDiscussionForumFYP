@@ -1,0 +1,11 @@
+@model OnlineDisscussionForum.Models.Forum.EditForumModel
+<div class="container body-content">
+<h2>Edit forum</h2>
+<form method="post" asp-action="Edit" asp-route-id="@Model.Id" enctype="multipart/form-data">
+<div asp-validation-summary="All" class="text-danger"></div>
+<input asp-for="Id" type="hidden" /><input asp-for="Version" type="hidden" />
+<div class="form-group"><label asp-for="Title"></label><input asp-for="Title" class="form-control" /><span asp-validation-for="Title" class="text-danger"></span></div>
+<div class="form-group"><label asp-for="Description"></label><textarea asp-for="Description" class="form-control" rows="10"></textarea><span asp-validation-for="Description" class="text-danger"></span></div>
+<div class="form-group"><label asp-for="ImageUpload"></label><input asp-for="ImageUpload" type="file" accept="image/png,image/jpeg,image/webp" /><span asp-validation-for="ImageUpload" class="text-danger"></span></div>
+<button class="btn btn-primary" type="submit">Save changes</button>
+</form></div>

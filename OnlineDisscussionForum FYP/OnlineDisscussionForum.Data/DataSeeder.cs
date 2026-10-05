@@ -1,64 +1,30 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using OnlineDisscussionForum.Data.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace OnlineDisscussionForum.Data
+namespace OnlineDisscussionForum.Data;
+
+public class DataSeeder(UserManager<ApplicationUser> users, RoleManager<IdentityRole> roles, IConfiguration configuration)
 {
-    public class DataSeeder
+    public async Task SeedSuperSeeder()
     {
-        private ApplicationDbContext _context;
-        public DataSeeder(ApplicationDbContext context)
+        if (!await roles.RoleExistsAsync("Admin")) Check(await roles.CreateAsync(new IdentityRole("Admin")));
+        var name = configuration["Admin:UserName"];
+        var password = configuration["Admin:Password"];
+        var email = configuration["Admin:Email"];
+        if (string.IsNullOrWhiteSpace(name)) return;
+        var user = await users.FindByNameAsync(name);
+        if (user == null)
         {
-            _context = context;
+            if (string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(email))
+                throw new InvalidOperationException("Initial administrator requires Admin:Email and Admin:Password.");
+            user = new ApplicationUser { UserName = name, Email = email, EmailConfirmed = true, MemberSince = DateTime.UtcNow };
+            Check(await users.CreateAsync(user, password));
         }
-        public  Task SeedSuperSeeder()
-        {
-            var roleStore = new RoleStore<IdentityRole>(_context);
-            var userStore = new UserStore<ApplicationUser>(_context);
-
-          
-            var user = new ApplicationUser
-            {
-                UserName = "ForumAdmin",
-                NormalizedUserName = "forumadmin",
-                Email = "admin@example.com",
-                NormalizedEmail = "admin@example.com",
-                EmailConfirmed = true,
-                LockoutEnabled = false,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                
-            };
-
-            var hasher = new PasswordHasher<ApplicationUser>();
-            var hashedPassword = hasher.HashPassword(user, "admin");
-            user.PasswordHash = hashedPassword;
-
-
-
-            var hasAdminRole = _context.Roles.Any(roles => roles.Name == "Admin");
-
-
-            if(!hasAdminRole)
-            {
-                roleStore.CreateAsync(new IdentityRole { Name = "Admin", NormalizedName = "admin" });
-            }
-
-
-            var hasSuperUser = _context.Users.Any(u => u.NormalizedUserName == user.UserName);
-            if(!hasSuperUser)
-            {
-                userStore.CreateAsync(user);
-                userStore.AddToRoleAsync(user, "Admin");
-            }
-             _context.SaveChangesAsync();
-
-
-            return Task.CompletedTask;
-        }
+        if (!await users.IsInRoleAsync(user, "Admin")) Check(await users.AddToRoleAsync(user, "Admin"));
+    }
+    private static void Check(IdentityResult result)
+    {
+        if (!result.Succeeded) throw new InvalidOperationException(string.Join("; ", result.Errors.Select(e => e.Description)));
     }
 }

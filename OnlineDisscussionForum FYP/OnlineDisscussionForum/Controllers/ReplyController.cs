@@ -1,77 +1,62 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OnlineDisscussionForum.Data;
-using OnlineDisscussionForum.Models.Reply;
 using OnlineDisscussionForum.Data.Models;
-using Microsoft.AspNetCore.Authorization;
-
-namespace OnlineDisscussionForum.Controllers
+using OnlineDisscussionForum.Models;
+using OnlineDisscussionForum.Models.Reply;
+namespace OnlineDisscussionForum.Controllers;
+[Authorize]
+public class ReplyController(IPost posts, UserManager<ApplicationUser> users) : Controller
 {
-    [Authorize]
-    public class ReplyController : Controller
+    [HttpGet]
+    public async Task<IActionResult> Create(int id)
     {
-        private readonly IPost _postService;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IApplicationUser _userService;
-       public ReplyController(IPost postService, UserManager<ApplicationUser> userManager, IApplicationUser userService)
-        {
-            _postService = postService;
-            _userManager = userManager;
-            _userService = userService;
-        }
-
-        public async Task<IActionResult> Create(int id)
-        {
-            var post = _postService.GetById(id);
-            var user = await _userManager.FindByNameAsync(User.Identity.Name);
-            var model = new PostReplyModel
-            {
-                PostContent = post.Content,
-                PostTitle = post.Title,
-                PostId = post.Id,
-
-                AuthorId = user.Id,
-                AuthorName = User.Identity.Name,
-                AuthorImageUrl = user.ProfileImageUrl,
-                AuthorRating = user.Rating,
-                IsAuthorAdmin = User.IsInRole("Admin"),
-
-                ForumName = post.Forum.Title,
-                ForumId = post.Forum.Id,
-                ForumImageUrl = post.Forum.ImageUrl,
-
-                Created = DateTime.Now
-               
-
-            };
-            return View(model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AddReply(PostReplyModel model)
-        {
-            var userId = _userManager.GetUserId(User);
-            var user = await _userManager.FindByIdAsync(userId);
-            var reply = BuildReply(model, user);
-            await _postService.AddReply(reply);
-            await _userService.UpdateUserRating(userId, typeof(PostReply));
-            return RedirectToAction("Index", "Post", new { id = model.PostId });
-        }
-
-        private PostReply BuildReply(PostReplyModel model, ApplicationUser user)
-        {
-            var post = _postService.GetById(model.PostId);
-            return new PostReply
-            {
-                Post = post,
-                Content = model.ReplyContent,
-                Created = DateTime.Now,
-                User = user
-            };
-        }
+        var post = posts.GetById(id); if (post == null) return NotFound();
+        var user = await users.GetUserAsync(User); if (user == null) return Challenge();
+        var model = new PostReplyModel { PostId = id }; Fill(model, post, user); return View(model);
+    }
+    [HttpPost]
+    public async Task<IActionResult> AddReply(PostReplyModel model)
+    {
+        var post = posts.GetById(model.PostId); if (post == null) return NotFound();
+        var user = await users.GetUserAsync(User); if (user == null) return Challenge();
+        if (!ModelState.IsValid) { Fill(model, post, user); return View("Create", model); }
+        await posts.AddReply(new PostReply { PostId = post.Id, UserId = user.Id, Content = model.ReplyContent.Trim(), Created = DateTime.UtcNow });
+        return RedirectToAction("Index", "Post", new { id = post.Id });
+    }
+    [HttpGet]
+    public IActionResult Edit(int id)
+    {
+        var reply = posts.GetReplyById(id); if (reply == null) return NotFound(); if (!CanManage(reply.UserId)) return Forbid();
+        return View(new ReplyEditModel { Id = id, Content = reply.Content, Version = reply.Version });
+    }
+    [HttpPost]
+    public async Task<IActionResult> Edit(int id, ReplyEditModel model)
+    {
+        var reply = posts.GetReplyById(id); if (reply == null) return NotFound(); if (!CanManage(reply.UserId)) return Forbid();
+        if (id != model.Id) return BadRequest(); if (!ModelState.IsValid) return View(model);
+        if (!await posts.UpdateReply(id, model.Content, model.Version)) return Conflict("This reply changed or was deleted. Reload before editing.");
+        return RedirectToAction("Index", "Post", new { id = reply.PostId });
+    }
+    [HttpGet]
+    public IActionResult Delete(int id)
+    {
+        var reply = posts.GetReplyById(id); if (reply == null) return NotFound(); if (!CanManage(reply.UserId)) return Forbid();
+        return View(new DeleteContentModel { Id = id, Title = "Reply to " + reply.Post.Title, Version = reply.Version });
+    }
+    [HttpPost, ActionName("Delete")]
+    public async Task<IActionResult> DeleteConfirmed(int id, DeleteContentModel model)
+    {
+        var reply = posts.GetReplyById(id); if (reply == null) return NotFound(); if (!CanManage(reply.UserId)) return Forbid();
+        if (id != model.Id || !ModelState.IsValid) return BadRequest();
+        if (!await posts.DeleteReply(id, model.Version)) return Conflict("This reply changed or was deleted. Reload before deleting.");
+        return RedirectToAction("Index", "Post", new { id = reply.PostId });
+    }
+    private bool CanManage(string authorId) => users.GetUserId(User) == authorId || User.IsInRole("Admin");
+    private void Fill(PostReplyModel model, Post post, ApplicationUser user)
+    {
+        model.PostTitle = post.Title; model.PostContent = post.Content; model.ForumId = post.ForumId; model.ForumName = post.Forum.Title;
+        model.ForumImageUrl = post.Forum.ImageUrl; model.AuthorName = user.UserName; model.AuthorId = user.Id;
     }
 }

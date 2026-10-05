@@ -1,148 +1,102 @@
-﻿
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.WindowsAzure.Storage.Blob;
 using OnlineDisscussionForum.Data;
 using OnlineDisscussionForum.Data.Models;
+using OnlineDisscussionForum.Models;
 using OnlineDisscussionForum.Models.Forum;
 using OnlineDisscussionForum.Models.Post;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
-
-namespace OnlineDisscussionForum.Controllers
+namespace OnlineDisscussionForum.Controllers;
+public class ForumController(IForum forums, IPost posts, IUpload uploads, ApplicationDbContext db) : Controller
 {
-    public class ForumController : Controller
+    public IActionResult Index(int page = 1)
     {
-        private readonly IForum _forumService;
-        private readonly IPost _postService;
-        private readonly IUpload _uploadService;
-        private readonly IConfiguration _configuration;
-
-        public ForumController(IForum forumService, IPost postService, IUpload uploadService, IConfiguration configuration)
+        page = Math.Max(1, page); ViewBag.Page = page;
+        var cutoff = DateTime.UtcNow.AddHours(-12);
+        var list = forums.GetAll().OrderBy(f => f.Title).Skip((page - 1) * 20).Take(21).Select(f => new ForumListingModel
         {
-            _forumService = forumService;
-            _postService = postService;
-            _uploadService = uploadService;
-            _configuration = configuration;
-        }
-
-        public IActionResult Index()
-        {
-            var forums = _forumService.GetAll().Select(forum => new ForumListingModel
-            {
-                Id = forum.Id,
-                Name = forum.Title,
-                Description = forum.Description,
-                NumberOfPosts = forum.Posts?.Count() ?? 0,
-                NumberOfUsers = _forumService.GetActiveUsers(forum.Id).Count(),
-                ImageUrl = forum.ImageUrl,
-                HasRecentPost = _forumService.HasRecentPost(forum.Id)
-            });
-            var model = new ForumIndexModel
-            {
-                ForumList = forums.OrderBy(f=>f.Name)
-            };
-            return View(model);
-        }
-
-        [HttpPost]
-        public IActionResult Search(int id, string searchQuery)
-        {
-            return RedirectToAction("Topic", new { id, searchQuery });
-        }
-        [Authorize(Roles = "Admin")]
-        public IActionResult Create()
-        {
-            var model = new AddForumModel();
-            return View(model);
-        }
-        [HttpPost]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> AddForum(AddForumModel model)
-        {
-
-           var imageUri = "/images/users/default.png";
-            if (model.ImageUpload != null)
-            {
-                var blockBlob = UploadForumImage(model.ImageUpload);
-                imageUri = blockBlob.Uri.AbsoluteUri;
-            }
-            var forum = new Forum
-            {
-                Title = model.Title,
-                Description = model.Description,
-                Created = DateTime.Now,
-                ImageUrl = imageUri
-            };
-            await _forumService.Create(forum);
-            return RedirectToAction("Index", "Forum");
-        }
-
-        private CloudBlockBlob UploadForumImage(IFormFile file)
-        {
-            var connectionString = _configuration.GetConnectionString("AzureStorageAccount");
-            var container = _uploadService.GetBlobContainer(connectionString, "forum-images");
-            var contentDisposition = ContentDispositionHeaderValue.Parse(file.ContentDisposition);
-            var filename = contentDisposition.FileName.Trim('"');
-            var blockBlob = container.GetBlockBlobReference(filename);
-             blockBlob.UploadFromStreamAsync(file.OpenReadStream());
-
-            return blockBlob;
-            
-        }
-
-        public IActionResult Topic(int id, string searchQuery)
-        {
-            var forum = _forumService.GetById(id);
-            var posts = new List<Post>();
-           
-
-                 posts = _postService.GetFilteredPosts(forum, searchQuery).ToList();
-            
-            var postListings = posts.Select(post => new PostListingModel
-            {
-                Id = post.Id,
-                AuthorId = post.User.Id,
-
-                AuthorRating = post.User.Rating,
-                AuthorName=post.User.UserName,
-                Title = post.Title,
-                DatePosted = post.Created.ToString(),
-                RepliesCount=post.Replies.Count(),
-                Forum=BuildForumListing(post)
-           
-            });
-
-            var model = new ForumTopicModel
-            {
-                Posts = postListings,
-                Forum = BuildForumListing(forum)
-            };
-            return View(model);
-        }
-
-        private ForumListingModel BuildForumListing(Post post)
-        {
-            var forum = post.Forum;
-            return BuildForumListing(forum);
-        }
-        private ForumListingModel BuildForumListing(Forum forum)
-        {
-           
-            return new ForumListingModel
-            {
-                Id = forum.Id,
-                Name = forum.Title,
-                Description = forum.Description,
-                ImageUrl = forum.ImageUrl
-
-            };
-        }
-
+            Id = f.Id, Name = f.Title, Description = f.Description, ImageUrl = f.ImageUrl,
+            NumberOfPosts = f.Posts.Count,
+            NumberOfUsers = db.Users.Count(u => db.Posts.Any(p => p.ForumId == f.Id && p.UserId == u.Id) || db.PostReplies.Any(r => r.Post.ForumId == f.Id && r.UserId == u.Id)),
+            HasRecentPost = f.Posts.Any(p => p.Created > cutoff)
+        }).ToList();
+        ViewBag.HasNext = list.Count > 20;
+        return View(new ForumIndexModel { ForumList = list.Take(20) });
     }
+    [HttpPost] public IActionResult Search(int id, string searchQuery) => RedirectToAction(nameof(Topic), new { id, searchQuery });
+    [Authorize(Roles = "Admin"), HttpGet] public IActionResult Create() => View(new AddForumModel());
+    [Authorize(Roles = "Admin"), HttpPost]
+    public async Task<IActionResult> AddForum(AddForumModel model)
+    {
+        if (!ModelState.IsValid) return View("Create", model);
+        string image = null;
+        try
+        {
+            image = await Upload(model.ImageUpload);
+            await forums.Create(new Forum { Title = model.Title.Trim(), Description = model.Description.Trim(), ImageUrl = image ?? "/images/forum/default.png", Created = DateTime.UtcNow });
+        }
+        catch (InvalidDataException ex) { ModelState.AddModelError("ImageUpload", ex.Message); return View("Create", model); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        { await uploads.DeleteImageAsync(image); ModelState.AddModelError("ImageUpload", "The image could not be saved. Try again later."); return View("Create", model); }
+        catch { await uploads.DeleteImageAsync(image); throw; }
+        return RedirectToAction(nameof(Index));
+    }
+    public IActionResult Topic(int id, string searchQuery, int page = 1)
+    {
+        var forum = forums.GetById(id); if (forum == null) return NotFound();
+        page = Math.Max(1, page); ViewBag.Page = page; ViewBag.SearchQuery = searchQuery;
+        var list = posts.GetFilteredPosts(forum, searchQuery).OrderByDescending(p => p.Created).ThenByDescending(p => p.Id)
+            .Skip((page - 1) * 20).Take(21).Select(p => new PostListingModel
+            {
+                Id = p.Id, AuthorId = p.UserId, AuthorName = p.User.UserName, AuthorRating = p.User.Rating,
+                Title = p.Title, DatePosted = p.Created.ToString(), RepliesCount = p.Replies.Count,
+                Forum = new ForumListingModel { Id = p.ForumId, Name = p.Forum.Title, ImageUrl = p.Forum.ImageUrl }
+            }).ToList();
+        ViewBag.HasNext = list.Count > 20;
+        return View(new ForumTopicModel { Forum = Listing(forum), Posts = list.Take(20) });
+    }
+    [Authorize(Roles = "Admin"), HttpGet]
+    public IActionResult Edit(int id)
+    {
+        var forum = forums.GetById(id); if (forum == null) return NotFound();
+        return View(new EditForumModel { Id = id, Title = forum.Title, Description = forum.Description, Version = forum.Version });
+    }
+    [Authorize(Roles = "Admin"), HttpPost]
+    public async Task<IActionResult> Edit(int id, EditForumModel model)
+    {
+        var forum = forums.GetById(id); if (forum == null) return NotFound();
+        if (model.Id != id) return BadRequest(); if (!ModelState.IsValid) return View(model);
+        string image = null;
+        try
+        {
+            image = await Upload(model.ImageUpload);
+            if (!await forums.Update(id, model.Title, model.Description, image ?? forum.ImageUrl, model.Version))
+            { await uploads.DeleteImageAsync(image); return Conflict("This forum changed or was deleted. Reload before editing."); }
+        }
+        catch (InvalidDataException ex) { ModelState.AddModelError("ImageUpload", ex.Message); return View(model); }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        { await uploads.DeleteImageAsync(image); ModelState.AddModelError("ImageUpload", "The image could not be saved. Try again later."); return View(model); }
+        catch { await uploads.DeleteImageAsync(image); throw; }
+        if (image != null) await uploads.DeleteImageAsync(forum.ImageUrl);
+        return RedirectToAction(nameof(Topic), new { id });
+    }
+    [Authorize(Roles = "Admin"), HttpGet]
+    public IActionResult Delete(int id)
+    {
+        var forum = forums.GetById(id); if (forum == null) return NotFound();
+        return View(new DeleteContentModel { Id = id, Title = forum.Title, Version = forum.Version });
+    }
+    [Authorize(Roles = "Admin"), HttpPost, ActionName("Delete")]
+    public async Task<IActionResult> DeleteConfirmed(int id, DeleteContentModel model)
+    {
+        var forum = forums.GetById(id); if (forum == null) return NotFound();
+        if (id != model.Id || !ModelState.IsValid) return BadRequest();
+        if (!await forums.Delete(id, model.Version)) { ModelState.AddModelError("", "This forum contains posts or has changed. Only unchanged empty forums can be deleted."); return View("Delete", model); }
+        await uploads.DeleteImageAsync(forum.ImageUrl); return RedirectToAction(nameof(Index));
+    }
+    private async Task<string> Upload(IFormFile file)
+    {
+        if (file == null) return null;
+        using var stream = file.OpenReadStream(); return await uploads.SaveImageAsync(stream, "forums");
+    }
+    private static ForumListingModel Listing(Forum f) => new() { Id = f.Id, Name = f.Title, Description = f.Description, ImageUrl = f.ImageUrl };
 }

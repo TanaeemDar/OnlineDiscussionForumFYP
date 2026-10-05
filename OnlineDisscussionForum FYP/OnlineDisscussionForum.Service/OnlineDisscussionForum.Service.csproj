@@ -1,11 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\OnlineDisscussionForum.Data\OnlineDisscussionForum.Data.csproj" />
-  </ItemGroup>
-
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>disable</Nullable></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../OnlineDisscussionForum.Data/OnlineDisscussionForum.Data.csproj" /></ItemGroup>
 </Project>

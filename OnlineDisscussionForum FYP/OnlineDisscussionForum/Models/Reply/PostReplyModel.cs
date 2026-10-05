@@ -1,4 +1,5 @@
-﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System;
 
 namespace OnlineDisscussionForum.Models.Reply
 {
@@ -10,6 +11,7 @@ namespace OnlineDisscussionForum.Models.Reply
         public int AuthorRating { get; set; }
         public string AuthorImageUrl { get; set; }
         public DateTime Created { get; set; }
+        [Required, StringLength(20000)]
         public string ReplyContent { get; set; }
         public bool IsAuthorAdmin { get; set; }
 

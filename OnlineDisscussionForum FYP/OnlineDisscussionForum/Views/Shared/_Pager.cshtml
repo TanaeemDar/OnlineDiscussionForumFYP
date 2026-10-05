@@ -1,0 +1,8 @@
+@if (ViewBag.Page != null)
+{
+    <nav aria-label="Pages">
+    @if (ViewBag.Page > 1) { <a asp-route-page="@(ViewBag.Page - 1)" asp-route-searchQuery="@ViewBag.SearchQuery">Previous</a> }
+    <span>Page @ViewBag.Page</span>
+    @if (ViewBag.HasNext == true) { <a asp-route-page="@(ViewBag.Page + 1)" asp-route-searchQuery="@ViewBag.SearchQuery">Next</a> }
+    </nav>
+}

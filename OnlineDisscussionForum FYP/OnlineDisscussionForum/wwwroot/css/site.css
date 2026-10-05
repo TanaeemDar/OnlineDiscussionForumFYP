@@ -1,4 +1,4 @@
-﻿body {
+body {
     padding: 50px 0 20px 0;
     background-color: #EEE;
    
@@ -454,3 +454,5 @@
         display: none;
     }
 }
+
+.postText { white-space: pre-wrap; overflow-wrap: anywhere; }

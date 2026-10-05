@@ -1,119 +1,57 @@
-﻿@model OnlineDisscussionForum.Models.Post.PostIndexModel
-
-
+@model OnlineDisscussionForum.Models.Post.PostIndexModel
+@{
+    var viewerId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var isAdmin = User.IsInRole("Admin");
+}
 <div class="container body-content">
     <div class="row postHeader">
         <div class="postHeading">
-            <span class="postIndexTitle">
-                @Model.Title
-
-            </span>
-            <span id="headingBtn"><a asp-controller="Forum" asp-action="Topic" asp-route-id="@Model.ForumId" class="btn btn-back">Back to @Model.ForumName </a></span>
+            <span class="postIndexTitle">@Model.Title</span>
+            <span id="headingBtn"><a asp-controller="Forum" asp-action="Topic" asp-route-id="@Model.ForumId" class="btn btn-back">Back to @Model.ForumName</a></span>
         </div>
-
     </div>
-
     <div class="row" id="postIndexContent">
         <div class="col-md-3 postAuthorContainer">
-            <div class="postAuthorImage" style="background-image:url(@Model.AuthorImageUrl);"></div>
-            <a asp-controller="Profile" asp-action="Detail" asp-route-id="@Model.AuthorId">
-                @Model.AuthorName
-
-            </a>
-            <span class="postData">@Model.Created</span>
-            @if (Model.IsAuthorAdmin)
-            {
-                <span class="isAdmin smaller">Admin</span>
-            }
+            <div class="postAuthorImage" style="background-image:url(@Model.AuthorImageUrl)"></div>
+            <a asp-controller="Profile" asp-action="Detail" asp-route-id="@Model.AuthorId">@Model.AuthorName</a>
+            <span class="postData">@Model.Created.ToString("yyyy-MM-dd HH:mm") UTC</span>
+            @if (Model.IsAuthorAdmin) { <span class="isAdmin smaller">Admin</span> }
         </div>
         <div class="col-md-9 postContentContainer">
-            <div class="postContent">
-                @Html.Raw(Model.PostContent)
-
-            </div>
+            <div class="postContent postText">@Model.PostContent</div>
         </div>
     </div>
-
-
-
+    @if (isAdmin || viewerId == Model.AuthorId)
+    {
+        <p><a asp-action="Edit" asp-route-id="@Model.Id">Edit post</a> · <a asp-action="Delete" asp-route-id="@Model.Id">Delete post</a></p>
+    }
     <div class="row" id="replyDivider"></div>
-
-
     @if (User.Identity.IsAuthenticated)
-
     {
-        <div class="row" id="postReplyRow">
-            <span>
-                <a asp-controller="Reply" asp-action="Create" asp-route-id="@Model.Id" class="btn btn-newReply">
-                    Post Reply
-                </a>
-            </span>
-        </div>
-
+        <div class="row" id="postReplyRow"><a asp-controller="Reply" asp-action="Create" asp-route-id="@Model.Id" class="btn btn-newReply">Post Reply</a></div>
     }
-    @if (Model.Replies.Any())
+    @foreach (var reply in Model.Replies)
     {
-        foreach (var reply in Model.Replies)
-        {
-            <div class="row replyContent">
-                <div class="col-md-3 replyAuthorContainer">
-                    <div class="postAuthorImage" style="background-image:url(@reply.AuthorImageUrl)"></div>
-                    <a asp-controller="Profile" asp-action="Detail" asp-route-id="@reply.AuthorId">
-                        @reply.AuthorName
-                    </a>
-                    @if (reply.IsAuthorAdmin)
+        <div class="row replyContent">
+            <div class="col-md-3 replyAuthorContainer">
+                <div class="postAuthorImage" style="background-image:url(@reply.AuthorImageUrl)"></div>
+                <a asp-controller="Profile" asp-action="Detail" asp-route-id="@reply.AuthorId">@reply.AuthorName</a>
+                @if (reply.IsAuthorAdmin) { <span class="isAdmin smaller">Admin</span> }
+                <span class="postDate">@reply.Created.ToString("yyyy-MM-dd HH:mm") UTC</span>
+            </div>
+            <div class="col-md-9 replyContentContainer">
+                <div class="postContentContainer">
+                    <div class="postText">@reply.ReplyContent</div>
+                    @if (isAdmin || viewerId == reply.AuthorId)
                     {
-                        <div class="isAdmin smaller">Admin</div>
-                        <br />
+                        <p><a asp-controller="Reply" asp-action="Edit" asp-route-id="@reply.Id">Edit reply</a> · <a asp-controller="Reply" asp-action="Delete" asp-route-id="@reply.Id">Delete reply</a></p>
                     }
-                    <span class="postDate">@reply.Created</span>
                 </div>
-                <dv class="col-md-9 replyContentContainer">
-                    <div class="postContentContainer">
-                        @Html.Raw(reply.ReplyContent)
-
-                    </div>
-                </dv>
             </div>
-        }
-
+        </div>
     }
-    else
+    @if (!Model.Replies.Any())
     {
-            <div class="row" id="forumIndexContent">
-                <div class="noPosts">
-                    <h3>
-                        There are no replies to this post.<br />
-                    </h3>
-                </div>
-            </div>
+        <div class="row" id="forumIndexContent"><div class="noPosts"><h3>There are no replies to this post.</h3></div></div>
     }
- </div>
-
-    @*<h1>@Model.Title</h1>
-        <div>
-            Author: @Model.AuthorName (@Model.AuthorRating)
-            Created: @Model.Created
-        </div>
-
-        <div>
-            @Model.PostContent
-        </div>
-
-        @if(Model.Replies.Any())
-        {
-            foreach(var reply in Model.Replies)
-            {
-        <div>
-            <div>
-                Reply Author: @reply.AuthorName
-                Reply Created: @reply.Created
-            </div>
-
-            <div>
-               Reply: @reply.ReplyContent
-            </div>
-
-        </div>
-            }
-        }*@
+</div>

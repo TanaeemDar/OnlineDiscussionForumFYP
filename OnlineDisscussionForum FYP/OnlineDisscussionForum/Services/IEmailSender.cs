@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace OnlineDisscussionForum.Services
+namespace OnlineDisscussionForum.Services;
+public interface IEmailSender
 {
-    public interface IEmailSender
-    {
-        Task SendEmailAsync(string email, string subject, string message);
-    }
+    bool IsEnabled { get; }
+    Task SendEmailAsync(string email, string subject, string message);
 }

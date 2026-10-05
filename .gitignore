@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+.forum-data/
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+.env
+.env.*
+!.env.example
+**/appsettings.Local.json
+.vs/
+TestResults/
+node_modules/
+artifacts/

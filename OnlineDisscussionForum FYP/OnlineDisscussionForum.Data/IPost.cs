@@ -1,23 +1,19 @@
-﻿using OnlineDisscussionForum.Data.Models;
-
-using System.Collections.Generic;
-
-using System.Threading.Tasks;
-
-namespace OnlineDisscussionForum.Data
+using OnlineDisscussionForum.Data.Models;
+namespace OnlineDisscussionForum.Data;
+public interface IPost
 {
-    public interface IPost
-    {
-        Post GetById(int id);
-        IEnumerable<Post> GetAll();
-        IEnumerable<Post> GetFilteredPosts(Forum forum,string searchQuery);
-        IEnumerable<Post> GetFilteredPosts(string searchQuery);
-        IEnumerable<Post> GetPostsByForum(int id);
-        IEnumerable<Post> GetLatestPosts(int n);
-        Task Add(Post post);
-        Task Delete(int id);
-        Task EditPostContent(int id, string nwContent);
-        Task AddReply(PostReply reply);
-        
-    }
+    Post GetById(int id);
+    IQueryable<Post> GetAll();
+    IQueryable<Post> GetFilteredPosts(Forum forum, string searchQuery);
+    IQueryable<Post> GetFilteredPosts(string searchQuery);
+    IQueryable<Post> GetPostsByForum(int id);
+    IQueryable<Post> GetLatestPosts(int n);
+    Task Add(Post post);
+    Task<bool> Delete(int id, string version = null);
+    Task<bool> EditPostContent(int id, string newContent);
+    Task<bool> Update(int id, string title, string content, string version);
+    Task AddReply(PostReply reply);
+    PostReply GetReplyById(int id);
+    Task<bool> UpdateReply(int id, string content, string version);
+    Task<bool> DeleteReply(int id, string version);
 }

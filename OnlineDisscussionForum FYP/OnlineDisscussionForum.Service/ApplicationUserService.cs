@@ -1,55 +1,19 @@
-﻿using OnlineDisscussionForum.Data;
+using Microsoft.EntityFrameworkCore;
+using OnlineDisscussionForum.Data;
 using OnlineDisscussionForum.Data.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace OnlineDisscussionForum.Service
+namespace OnlineDisscussionForum.Service;
+
+public class ApplicationUserService(ApplicationDbContext context) : IApplicationUser
 {
-   public class ApplicationUserService : IApplicationUser
+    public IQueryable<ApplicationUser> GetAll() => context.Users.AsNoTracking();
+    public ApplicationUser GetById(string id) => GetAll().SingleOrDefault(user => user.Id == id);
+
+    public async Task SetProfileImage(string id, Uri uri)
     {
-        private readonly ApplicationDbContext _context;
-        public ApplicationUserService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        public IEnumerable<ApplicationUser> GetAll()
-        {
-            return _context.ApplicationUsers;
-        }
-
-        public ApplicationUser GetById(string id)
-        {
-            return GetAll().FirstOrDefault(user => user.Id == id);
-        }
-
-        public async Task UpdateUserRating(string userId, Type type)
-        {
-            var user = GetById(userId);
-            user.Rating = CalculateUserRating(type, user.Rating);
-            
-            await _context.SaveChangesAsync();
-        }
-
-        private int CalculateUserRating(Type type, int userRating)
-        {
-            var inc = 0;
-            if (type == typeof(Post))
-                inc = 1;
-            if (type == typeof(PostReply))
-                inc = 3;
-            return userRating + inc;
-        }
-
-        public async Task SetProfileImage(string id, Uri uri)
-        {
-            var user = GetById(id);
-            user.ProfileImageUrl = uri.AbsoluteUri;
-            _context.Update(user);
-            await _context.SaveChangesAsync();
-        }
+        // Only update the image column; a concurrent content write may have changed the rating.
+        var count = await context.Users.Where(user => user.Id == id && user.IsActive)
+            .ExecuteUpdateAsync(set => set.SetProperty(user => user.ProfileImageUrl, uri.ToString()));
+        if (count == 0) throw new InvalidOperationException("The account is no longer active.");
     }
 }

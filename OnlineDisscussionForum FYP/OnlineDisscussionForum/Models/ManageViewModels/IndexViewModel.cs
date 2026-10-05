@@ -8,6 +8,7 @@ namespace OnlineDisscussionForum.Models.ManageViewModels
 {
     public class IndexViewModel
     {
+        [Required, StringLength(20, MinimumLength = 3)]
         public string Username { get; set; }
 
         public bool IsEmailConfirmed { get; set; }

@@ -1,0 +1,24 @@
+[Unit]
+Description=Online Discussion Forum
+After=network.target
+
+[Service]
+User=forum
+Group=forum
+WorkingDirectory=/opt/forum/current
+ExecStart=/usr/bin/dotnet /opt/forum/current/OnlineDisscussionForum.dll
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://127.0.0.1:5080
+Environment=DataDirectory=/var/lib/forum
+EnvironmentFile=/etc/forum/forum.env
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/forum
+
+[Install]
+WantedBy=multi-user.target

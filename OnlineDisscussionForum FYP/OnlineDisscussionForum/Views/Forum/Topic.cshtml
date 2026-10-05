@@ -1,4 +1,4 @@
-﻿@model OnlineDisscussionForum.Models.Forum.ForumTopicModel
+@model OnlineDisscussionForum.Models.Forum.ForumTopicModel
 
 
 
@@ -139,3 +139,7 @@
 
         </div>
     }*@
+
+@if (User.IsInRole("Admin")) { <p><a asp-action="Edit" asp-route-id="@Model.Forum.Id">Edit forum</a> · <a asp-action="Delete" asp-route-id="@Model.Forum.Id">Delete forum</a></p> }
+
+<partial name="_Pager" />
