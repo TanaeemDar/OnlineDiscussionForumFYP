@@ -4,12 +4,37 @@ ASP.NET Core MVC forum with accounts, administrator-managed forums, posts, repli
 
 ## Requirements
 
-- .NET 10 SDK for development; ASP.NET Core 10 runtime on the server.
+- .NET 10 SDK for development (`setup.sh` installs it if needed); ASP.NET Core 10 runtime on the server.
 - Python 3 for the SQLite backup/restore helper.
 - Node.js 20.11+ and Chromium/Playwright for the optional browser verification.
 - One application instance with persistent local storage. The intended Azure deployment is a Linux VM with the application and SQLite on the same server.
 
 The old manual SQL script is archived as `legacy/SqlServerQueries.txt` and is not used for setup. The old SQL Server migration sources are preserved as noncompiled reference files under `OnlineDisscussionForum FYP/legacy/SqlServerMigrations/`. The active migrations are SQLite-only in the web project. This installation starts fresh; existing SQL Server data import is outside the agreed scope.
+
+## One-command setup
+
+On a fresh Debian/Ubuntu Linux or macOS system, clone or download this repository, open a Bash terminal in its directory, and run:
+
+```bash
+./setup.sh
+```
+
+The script finds a compatible .NET 10 SDK or installs one locally under `~/.local/share/forum-dotnet` using Microsoft's [official installer](https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual). On Debian/Ubuntu, missing-SDK setup installs runtime prerequisites through `apt-get` and may ask for your sudo password. Internet access is required for the SDK and NuGet packages. On other Linux distributions, install .NET 10 and its runtime prerequisites first. On Windows, use an Ubuntu WSL terminal.
+
+Setup prompts for your administrator username, email, and password, restores packages, builds the application, applies SQLite migrations, and starts the forum at **http://127.0.0.1:5080**. Sign in at `/Account/Login` using the **username** you chose. No default password or SMTP account is needed. The first database starts empty; the private sample accounts from the maintainer's local machine are not distributed.
+
+Press Ctrl+C to stop. Run `./setup.sh` again to restart; existing accounts, discussions, uploads, and passwords are preserved. Avoid running setup while another instance is using the same database. The script checks the selected local port before making changes. This starts a local development server; use the Azure deployment instructions below for public production hosting.
+
+Optional commands:
+
+```bash
+./setup.sh --no-start                 # Prepare the SDK, application, and database only
+FORUM_PORT=5081 ./setup.sh            # Use another local port
+DataDirectory="$HOME/forum-data" ./setup.sh  # Choose persistent storage
+./setup.sh --help
+```
+
+For unattended first setup, supply `Admin__UserName`, `Admin__Email`, and `Admin__Password` through environment variables. Setup does not print or save the password. To initialize an additional admin in an existing installation, supply these variables again; an existing username retains its current password. A private `.setup-complete` marker records successful setup in the data directory. `DOTNET_COMMAND` can select an existing SDK executable, and `FORUM_DOTNET_DIR` can change the local SDK installation directory. The script manages `DataDirectory/forum.db`; unset any `ConnectionStrings__DefaultConnection` override before using it.
 
 ## Run locally
 
